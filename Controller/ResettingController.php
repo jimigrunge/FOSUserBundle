@@ -52,11 +52,12 @@ class ResettingController extends Controller
                 'invalid_username' => $username
             ));
         }
-
+/*
+ * Removed this annoying check.  This needs to be smarter or allow more control.
         if ($user->isPasswordRequestNonExpired($this->container->getParameter('fos_user.resetting.token_ttl'))) {
             return $this->render('FOSUserBundle:Resetting:passwordAlreadyRequested.html.twig');
         }
-
+ */
         if (null === $user->getConfirmationToken()) {
             /** @var $tokenGenerator \FOS\UserBundle\Util\TokenGeneratorInterface */
             $tokenGenerator = $this->get('fos_user.util.token_generator');
