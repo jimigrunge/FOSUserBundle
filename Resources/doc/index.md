@@ -312,7 +312,7 @@ in your application:
 # app/config/security.yml
 security:
     encoders:
-        FOS\UserBundle\Model\UserInterface: sha512
+        FOS\UserBundle\Model\UserInterface: bcrypt
 
     role_hierarchy:
         ROLE_ADMIN:       ROLE_USER
@@ -327,7 +327,7 @@ security:
             pattern: ^/
             form_login:
                 provider: fos_userbundle
-                csrf_provider: form.csrf_provider
+                csrf_provider: security.csrf.token_manager # Use form.csrf_provider instead for Symfony <2.4
             logout:       true
             anonymous:    true
 
