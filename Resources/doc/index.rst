@@ -118,6 +118,7 @@ start:
 
     .. code-block:: php-annotations
 
+        <?php
         // src/AppBundle/Entity/User.php
 
         namespace AppBundle\Entity;
@@ -174,7 +175,7 @@ start:
 
 .. caution::
 
-    ``user`` is a reserved keyword in SQL so you cannot use it as table name.
+    ``user`` is a reserved keyword in the SQL standard. If you need to use reserved words, surround them with backticks, *e.g.* ``@ORM\Table(name="`user`")``
 
 b) MongoDB User class
 .....................
@@ -439,7 +440,7 @@ You now can run the following command to create the model:
     To create SQL, run the command ``propel:build --insert-sql`` or use migration
     commands if you have an existing schema in your database.
 
-You now can login at ``http://app.com/app_dev.php/login``!
+You now can log in at ``http://app.com/app_dev.php/login``!
 
 Next Steps
 ~~~~~~~~~~
