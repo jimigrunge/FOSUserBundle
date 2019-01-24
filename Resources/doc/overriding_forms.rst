@@ -68,6 +68,7 @@ the form type hierarchy and then adds the custom ``name`` field.
 
 .. code-block:: php
 
+    <?php
     // src/AppBundle/Form/RegistrationType.php
 
     namespace AppBundle\Form;
@@ -85,9 +86,6 @@ the form type hierarchy and then adds the custom ``name`` field.
         public function getParent()
         {
             return 'FOS\UserBundle\Form\Type\RegistrationFormType';
-
-            // Or for Symfony < 2.8
-            // return 'fos_user_registration';
         }
 
         public function getBlockPrefix()
@@ -158,8 +156,6 @@ changing the registration form type in YAML.
         registration:
             form:
                 type: AppBundle\Form\RegistrationType
-                # if you are using Symfony < 2.8 you should use the type name instead
-                # type: app_user_registration
 
 Note how the ``alias`` value used in your form type's service configuration tag
 is used in the bundle configuration to tell the FOSUserBundle to use your custom

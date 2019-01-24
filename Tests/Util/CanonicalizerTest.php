@@ -12,11 +12,15 @@
 namespace FOS\UserBundle\Tests\Util;
 
 use FOS\UserBundle\Util\Canonicalizer;
+use PHPUnit\Framework\TestCase;
 
-class CanonicalizerTest extends \PHPUnit_Framework_TestCase
+class CanonicalizerTest extends TestCase
 {
     /**
      * @dataProvider canonicalizeProvider
+     *
+     * @param $source
+     * @param $expectedResult
      */
     public function testCanonicalize($source, $expectedResult)
     {
@@ -24,6 +28,9 @@ class CanonicalizerTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($expectedResult, $canonicalizer->canonicalize($source));
     }
 
+    /**
+     * @return array
+     */
     public function canonicalizeProvider()
     {
         return array(

@@ -13,25 +13,39 @@ namespace FOS\UserBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Security\Core\SecurityContextInterface;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
+/**
+ * Controller managing security.
+ *
+ * @author Thibault Duplessis <thibault.duplessis@gmail.com>
+ * @author Christophe Coevoet <stof@notk.org>
+ */
 class SecurityController extends Controller
 {
+    private $tokenManager;
+
+    public function __construct(CsrfTokenManagerInterface $tokenManager = null)
+    {
+        $this->tokenManager = $tokenManager;
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return Response
+     */
     public function loginAction(Request $request)
     {
-        /** @var $session \Symfony\Component\HttpFoundation\Session\Session */
+        /** @var $session Session */
         $session = $request->getSession();
 
-        if (class_exists('\Symfony\Component\Security\Core\Security')) {
-            $authErrorKey = Security::AUTHENTICATION_ERROR;
-            $lastUsernameKey = Security::LAST_USERNAME;
-        } else {
-            // BC for SF < 2.6
-            $authErrorKey = SecurityContextInterface::AUTHENTICATION_ERROR;
-            $lastUsernameKey = SecurityContextInterface::LAST_USERNAME;
-        }
+        $authErrorKey = Security::AUTHENTICATION_ERROR;
+        $lastUsernameKey = Security::LAST_USERNAME;
 
         // get the error if any (works with forward and redirect -- see below)
         if ($request->attributes->has($authErrorKey)) {
@@ -50,33 +64,15 @@ class SecurityController extends Controller
         // last username entered by the user
         $lastUsername = (null === $session) ? '' : $session->get($lastUsernameKey);
 
-        if ($this->has('security.csrf.token_manager')) {
-            $csrfToken = $this->get('security.csrf.token_manager')->getToken('authenticate')->getValue();
-        } else {
-            // BC for SF < 2.4
-            $csrfToken = $this->has('form.csrf_provider')
-                ? $this->get('form.csrf_provider')->generateCsrfToken('authenticate')
-                : null;
-        }
+        $csrfToken = $this->tokenManager
+            ? $this->tokenManager->getToken('authenticate')->getValue()
+            : null;
 
         return $this->renderLogin(array(
             'last_username' => $lastUsername,
             'error' => $error,
             'csrf_token' => $csrfToken,
         ));
-    }
-
-    /**
-     * Renders the login template with the given parameters. Overwrite this function in
-     * an extended controller to provide additional data for the login template.
-     *
-     * @param array $data
-     *
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    protected function renderLogin(array $data)
-    {
-        return $this->render('FOSUserBundle:Security:login.html.twig', $data);
     }
 
     public function checkAction()
@@ -87,5 +83,18 @@ class SecurityController extends Controller
     public function logoutAction()
     {
         throw new \RuntimeException('You must activate the logout in your security firewall configuration.');
+    }
+
+    /**
+     * Renders the login template with the given parameters. Overwrite this function in
+     * an extended controller to provide additional data for the login template.
+     *
+     * @param array $data
+     *
+     * @return Response
+     */
+    protected function renderLogin(array $data)
+    {
+        return $this->render('@FOSUser/Security/login.html.twig', $data);
     }
 }

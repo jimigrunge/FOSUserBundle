@@ -12,8 +12,9 @@
 namespace FOS\UserBundle\Tests\Model;
 
 use FOS\UserBundle\Model\User;
+use PHPUnit\Framework\TestCase;
 
-class UserTest extends \PHPUnit_Framework_TestCase
+class UserTest extends TestCase
 {
     public function testUsername()
     {
@@ -21,7 +22,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($user->getUsername());
 
         $user->setUsername('tony');
-        $this->assertEquals('tony', $user->getUsername());
+        $this->assertSame('tony', $user->getUsername());
     }
 
     public function testEmail()
@@ -30,7 +31,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($user->getEmail());
 
         $user->setEmail('tony@mail.org');
-        $this->assertEquals('tony@mail.org', $user->getEmail());
+        $this->assertSame('tony@mail.org', $user->getEmail());
     }
 
     public function testIsPasswordRequestNonExpired()
@@ -76,6 +77,25 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($user->hasRole($newrole));
         $user->addRole($newrole);
         $this->assertTrue($user->hasRole($newrole));
+    }
+
+    public function testIsEqualTo()
+    {
+        $user = $this->getUser();
+        $this->assertTrue($user->isEqualTo($user));
+        $this->assertFalse($user->isEqualTo($this->getMockBuilder('FOS\UserBundle\Model\UserInterface')->getMock()));
+
+        $user2 = $this->getUser();
+        $user2->setPassword('secret');
+        $this->assertFalse($user->isEqualTo($user2));
+
+        $user3 = $this->getUser();
+        $user3->setSalt('pepper');
+        $this->assertFalse($user->isEqualTo($user3));
+
+        $user4 = $this->getUser();
+        $user4->setUsername('f00b4r');
+        $this->assertFalse($user->isEqualTo($user4));
     }
 
     /**

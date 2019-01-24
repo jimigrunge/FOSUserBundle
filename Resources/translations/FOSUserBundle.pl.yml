@@ -13,7 +13,7 @@ security:
     login:
         username: 'Nazwa użytkownika'
         password: Hasło
-        remember_me: 'Nie wylogowuj mnie'
+        remember_me: 'Zapamiętaj mnie'
         submit: Zaloguj
 profile:
     show:
@@ -28,20 +28,30 @@ change_password:
     flash:
         success: 'Hasło zostało zmienione'
 registration:
-    check_email: 'Na adres %email% wysłano wiadomość e-mail. Zawiera ona link, na który należy kliknąć, aby aktywować konto.'
-    confirmed: 'Gratulacje %username%, potwierdziłeś konto.'
-    back: 'Powrót do poprzedniej strony.'
+    check_email: 'Na adres %email% wysłano wiadomość e-mail z linkiem. Kliknij go, aby aktywować Twoje konto.'
+    confirmed: 'Gratulacje %username%, Twoje konto zostało aktywowane.'
+    back: 'Powrót do poprzedniej strony'
     submit: Zarejestruj
     flash:
-        user_created: 'Stworzono użytkownika'
+        user_created: 'Twoje konto zostało utworzone'
     email:
-        subject: 'Witaj %username%!'
-        message: "Cześć %username%!\n\nAby potwierdzić swoje konto - proszę przejść do %confirmationUrl%\n\nPozdrawiamy,\nZespół.\n"
+        subject: 'Cześć %username%!'
+        message: |
+            Cześć %username%!
+
+            Aby aktywować Twoje konto, przejdź pod adres %confirmationUrl%
+
+            Pozdrawiamy,
+            Zespół.
 resetting:
-    password_already_requested: 'W przeciągu ostatnich 24 godzin nastąpiła już próba odzyskania hasła.'
-    check_email: 'Na adres %email% wysłano wiadomość e-mail. Zawiera ona link, w którego należy kliknąć, aby zresetować hasło.'
+    check_email: |
+        E-mail został wysłany. Zawiera on link do formularza zmiany hasła.
+        Uwaga: Możesz zresetować hasło tylko jeden raz w ciągu %tokenLifetime% godzin.
+
+        Sprawdź swoją skrzynkę pocztową, jeśli jednak nie widzisz wiadomości od nas, sprawdź folder spam lub spróbuj
+        ponownie później.
+
     request:
-        invalid_username: 'Nazwa użytkownika lub e-mail "%username%" nie istnieje.'
         username: 'Nazwa użytkownika lub e-mail'
         submit: 'Resetuj hasło'
     reset:
@@ -50,7 +60,15 @@ resetting:
         success: 'Hasło zostało zresetowane'
     email:
         subject: 'Resetowanie hasła'
-        message: "Cześć %username%!\n\nAby zresetować hasło - proszę przejść do %confirmationUrl%\n\nPozdrawiamy,\nZespół.\n"
+        message: |
+            Cześć %username%!
+
+            Aby zresetować hasło, przejdź pod adres %confirmationUrl%
+
+            Pozdrawiamy,
+            Zespół.
+
+# Global strings
 layout:
     logout: Wyloguj
     login: Zaloguj

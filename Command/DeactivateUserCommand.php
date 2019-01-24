@@ -11,7 +11,8 @@
 
 namespace FOS\UserBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use FOS\UserBundle\Util\UserManipulator;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -20,10 +21,21 @@ use Symfony\Component\Console\Question\Question;
 /**
  * @author Antoine Hérault <antoine.herault@gmail.com>
  */
-class DeactivateUserCommand extends ContainerAwareCommand
+class DeactivateUserCommand extends Command
 {
+    protected static $defaultName = 'fos:user:deactivate';
+
+    private $userManipulator;
+
+    public function __construct(UserManipulator $userManipulator)
+    {
+        parent::__construct();
+
+        $this->userManipulator = $userManipulator;
+    }
+
     /**
-     * @see Command
+     * {@inheritdoc}
      */
     protected function configure()
     {
@@ -33,41 +45,34 @@ class DeactivateUserCommand extends ContainerAwareCommand
             ->setDefinition(array(
                 new InputArgument('username', InputArgument::REQUIRED, 'The username'),
             ))
-            ->setHelp(<<<EOT
+            ->setHelp(<<<'EOT'
 The <info>fos:user:deactivate</info> command deactivates a user (will not be able to log in)
 
-  <info>php app/console fos:user:deactivate matthieu</info>
+  <info>php %command.full_name% matthieu</info>
 EOT
             );
     }
 
     /**
-     * @see Command
+     * {@inheritdoc}
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $username = $input->getArgument('username');
 
-        $manipulator = $this->getContainer()->get('fos_user.util.user_manipulator');
-        $manipulator->deactivate($username);
+        $this->userManipulator->deactivate($username);
 
         $output->writeln(sprintf('User "%s" has been deactivated.', $username));
     }
 
     /**
-     * @see Command
+     * {@inheritdoc}
      */
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        if (!$this->getHelperSet()->has('question')) {
-            $this->legacyInteract($input, $output);
-
-            return;
-        }
-
         if (!$input->getArgument('username')) {
             $question = new Question('Please choose a username:');
-            $question->setValidator(function($username) {
+            $question->setValidator(function ($username) {
                 if (empty($username)) {
                     throw new \Exception('Username can not be empty');
                 }
@@ -77,25 +82,6 @@ EOT
             $answer = $this->getHelper('question')->ask($input, $output, $question);
 
             $input->setArgument('username', $answer);
-        }
-    }
-
-    // BC for SF <2.5
-    private function legacyInteract(InputInterface $input, OutputInterface $output)
-    {
-        if (!$input->getArgument('username')) {
-            $username = $this->getHelper('dialog')->askAndValidate(
-                $output,
-                'Please choose a username:',
-                function($username) {
-                    if (empty($username)) {
-                        throw new \Exception('Username can not be empty');
-                    }
-
-                    return $username;
-                }
-            );
-            $input->setArgument('username', $username);
         }
     }
 }

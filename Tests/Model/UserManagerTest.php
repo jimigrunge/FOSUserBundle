@@ -11,65 +11,53 @@
 
 namespace FOS\UserBundle\Tests\Model;
 
-class UserManagerTest extends \PHPUnit_Framework_TestCase
+use FOS\UserBundle\Model\UserManager;
+use PHPUnit\Framework\TestCase;
+
+class UserManagerTest extends TestCase
 {
+    /** @var UserManager|\PHPUnit_Framework_MockObject_MockObject */
     private $manager;
-    private $encoderFactory;
-    private $usernameCanonicalizer;
-    private $emailCanonicalizer;
+
+    /** @var \PHPUnit_Framework_MockObject_MockObject */
+    private $passwordUpdater;
+
+    /** @var \PHPUnit_Framework_MockObject_MockObject */
+    private $fieldsUpdater;
 
     protected function setUp()
     {
-        $this->encoderFactory        = $this->getMockEncoderFactory();
-        $this->usernameCanonicalizer = $this->getMockCanonicalizer();
-        $this->emailCanonicalizer    = $this->getMockCanonicalizer();
+        $this->passwordUpdater = $this->getMockBuilder('FOS\UserBundle\Util\PasswordUpdaterInterface')->getMock();
+        $this->fieldsUpdater = $this->getMockBuilder('FOS\UserBundle\Util\CanonicalFieldsUpdater')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $this->manager = $this->getUserManager(array(
-            $this->encoderFactory,
-            $this->usernameCanonicalizer,
-            $this->emailCanonicalizer,
+            $this->passwordUpdater,
+            $this->fieldsUpdater,
         ));
     }
 
     public function testUpdateCanonicalFields()
     {
         $user = $this->getUser();
-        $user->setUsername('Username');
-        $user->setEmail('User@Example.com');
 
-        $this->usernameCanonicalizer->expects($this->once())
-            ->method('canonicalize')
-            ->with('Username')
-            ->will($this->returnCallback('strtolower'));
-
-        $this->emailCanonicalizer->expects($this->once())
-            ->method('canonicalize')
-            ->with('User@Example.com')
-            ->will($this->returnCallback('strtolower'));
+        $this->fieldsUpdater->expects($this->once())
+            ->method('updateCanonicalFields')
+            ->with($this->identicalTo($user));
 
         $this->manager->updateCanonicalFields($user);
-        $this->assertEquals('username', $user->getUsernameCanonical());
-        $this->assertEquals('user@example.com', $user->getEmailCanonical());
     }
 
     public function testUpdatePassword()
     {
-        $encoder = $this->getMockPasswordEncoder();
         $user = $this->getUser();
-        $user->setPlainPassword('password');
 
-        $this->encoderFactory->expects($this->once())
-            ->method('getEncoder')
-            ->will($this->returnValue($encoder));
-
-        $encoder->expects($this->once())
-            ->method('encodePassword')
-            ->with('password', $user->getSalt())
-            ->will($this->returnValue('encodedPassword'));
+        $this->passwordUpdater->expects($this->once())
+            ->method('hashPassword')
+            ->with($this->identicalTo($user));
 
         $this->manager->updatePassword($user);
-        $this->assertEquals('encodedPassword', $user->getPassword(), '->updatePassword() sets encoded password');
-        $this->assertNull($user->getPlainPassword(), '->updatePassword() erases credentials');
     }
 
     public function testFindUserByUsername()
@@ -77,8 +65,8 @@ class UserManagerTest extends \PHPUnit_Framework_TestCase
         $this->manager->expects($this->once())
             ->method('findUserBy')
             ->with($this->equalTo(array('usernameCanonical' => 'jack')));
-        $this->usernameCanonicalizer->expects($this->once())
-            ->method('canonicalize')
+        $this->fieldsUpdater->expects($this->once())
+            ->method('canonicalizeUsername')
             ->with('jack')
             ->will($this->returnValue('jack'));
 
@@ -90,8 +78,8 @@ class UserManagerTest extends \PHPUnit_Framework_TestCase
         $this->manager->expects($this->once())
             ->method('findUserBy')
             ->with($this->equalTo(array('usernameCanonical' => 'jack')));
-        $this->usernameCanonicalizer->expects($this->once())
-            ->method('canonicalize')
+        $this->fieldsUpdater->expects($this->once())
+            ->method('canonicalizeUsername')
             ->with('JaCk')
             ->will($this->returnValue('jack'));
 
@@ -103,8 +91,8 @@ class UserManagerTest extends \PHPUnit_Framework_TestCase
         $this->manager->expects($this->once())
             ->method('findUserBy')
             ->with($this->equalTo(array('emailCanonical' => 'jack@email.org')));
-        $this->emailCanonicalizer->expects($this->once())
-            ->method('canonicalize')
+        $this->fieldsUpdater->expects($this->once())
+            ->method('canonicalizeEmail')
             ->with('jack@email.org')
             ->will($this->returnValue('jack@email.org'));
 
@@ -116,8 +104,8 @@ class UserManagerTest extends \PHPUnit_Framework_TestCase
         $this->manager->expects($this->once())
             ->method('findUserBy')
             ->with($this->equalTo(array('emailCanonical' => 'jack@email.org')));
-        $this->emailCanonicalizer->expects($this->once())
-            ->method('canonicalize')
+        $this->fieldsUpdater->expects($this->once())
+            ->method('canonicalizeEmail')
             ->with('JaCk@EmAiL.oRg')
             ->will($this->returnValue('jack@email.org'));
 
@@ -129,8 +117,8 @@ class UserManagerTest extends \PHPUnit_Framework_TestCase
         $this->manager->expects($this->once())
             ->method('findUserBy')
             ->with($this->equalTo(array('usernameCanonical' => 'jack')));
-        $this->usernameCanonicalizer->expects($this->once())
-            ->method('canonicalize')
+        $this->fieldsUpdater->expects($this->once())
+            ->method('canonicalizeUsername')
             ->with('JaCk')
             ->will($this->returnValue('jack'));
 
@@ -141,36 +129,58 @@ class UserManagerTest extends \PHPUnit_Framework_TestCase
     {
         $this->manager->expects($this->once())
             ->method('findUserBy')
-            ->with($this->equalTo(array('emailCanonical' => 'jack@email.org')));
-        $this->emailCanonicalizer->expects($this->once())
-            ->method('canonicalize')
+            ->with($this->equalTo(array('emailCanonical' => 'jack@email.org')))
+            ->willReturn($this->getUser());
+        $this->fieldsUpdater->expects($this->once())
+            ->method('canonicalizeEmail')
             ->with('JaCk@EmAiL.oRg')
             ->will($this->returnValue('jack@email.org'));
 
         $this->manager->findUserByUsernameOrEmail('JaCk@EmAiL.oRg');
     }
 
-    private function getMockCanonicalizer()
+    public function testFindUserByUsernameOrEmailWithUsernameThatLooksLikeEmail()
     {
-        return $this->getMock('FOS\UserBundle\Util\CanonicalizerInterface');
+        $usernameThatLooksLikeEmail = 'bob@example.com';
+        $user = $this->getUser();
+
+        $this->manager->expects($this->at(0))
+            ->method('findUserBy')
+            ->with($this->equalTo(array('emailCanonical' => $usernameThatLooksLikeEmail)))
+            ->will($this->returnValue(null));
+        $this->fieldsUpdater->expects($this->once())
+            ->method('canonicalizeEmail')
+            ->with($usernameThatLooksLikeEmail)
+            ->willReturn($usernameThatLooksLikeEmail);
+
+        $this->manager->expects($this->at(1))
+            ->method('findUserBy')
+            ->with($this->equalTo(array('usernameCanonical' => $usernameThatLooksLikeEmail)))
+            ->will($this->returnValue($user));
+        $this->fieldsUpdater->expects($this->once())
+            ->method('canonicalizeUsername')
+            ->with($usernameThatLooksLikeEmail)
+            ->willReturn($usernameThatLooksLikeEmail);
+
+        $actualUser = $this->manager->findUserByUsernameOrEmail($usernameThatLooksLikeEmail);
+
+        $this->assertSame($user, $actualUser);
     }
 
-    private function getMockEncoderFactory()
-    {
-        return $this->getMock('Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface');
-    }
-
-    private function getMockPasswordEncoder()
-    {
-        return $this->getMock('Symfony\Component\Security\Core\Encoder\PasswordEncoderInterface');
-    }
-
+    /**
+     * @return mixed
+     */
     private function getUser()
     {
         return $this->getMockBuilder('FOS\UserBundle\Model\User')
             ->getMockForAbstractClass();
     }
 
+    /**
+     * @param array $args
+     *
+     * @return mixed
+     */
     private function getUserManager(array $args)
     {
         return $this->getMockBuilder('FOS\UserBundle\Model\UserManager')

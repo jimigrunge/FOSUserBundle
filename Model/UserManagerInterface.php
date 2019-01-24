@@ -37,8 +37,6 @@ interface UserManagerInterface
      * Deletes a user.
      *
      * @param UserInterface $user
-     *
-     * @return void
      */
     public function deleteUser(UserInterface $user);
 
@@ -47,7 +45,7 @@ interface UserManagerInterface
      *
      * @param array $criteria
      *
-     * @return UserInterface
+     * @return UserInterface|null
      */
     public function findUserBy(array $criteria);
 
@@ -56,7 +54,7 @@ interface UserManagerInterface
      *
      * @param string $username
      *
-     * @return UserInterface or null if user does not exist
+     * @return UserInterface|null
      */
     public function findUserByUsername($username);
 
@@ -65,7 +63,7 @@ interface UserManagerInterface
      *
      * @param string $email
      *
-     * @return UserInterface or null if user does not exist
+     * @return UserInterface|null
      */
     public function findUserByEmail($email);
 
@@ -74,7 +72,7 @@ interface UserManagerInterface
      *
      * @param string $usernameOrEmail
      *
-     * @return UserInterface or null if user does not exist
+     * @return UserInterface|null
      */
     public function findUserByUsernameOrEmail($usernameOrEmail);
 
@@ -83,7 +81,7 @@ interface UserManagerInterface
      *
      * @param string $token
      *
-     * @return UserInterface or null if user does not exist
+     * @return UserInterface|null
      */
     public function findUserByConfirmationToken($token);
 
@@ -105,8 +103,6 @@ interface UserManagerInterface
      * Reloads a user.
      *
      * @param UserInterface $user
-     *
-     * @return void
      */
     public function reloadUser(UserInterface $user);
 
@@ -114,8 +110,6 @@ interface UserManagerInterface
      * Updates a user.
      *
      * @param UserInterface $user
-     *
-     * @return void
      */
     public function updateUser(UserInterface $user);
 
@@ -123,8 +117,6 @@ interface UserManagerInterface
      * Updates the canonical username and email fields for a user.
      *
      * @param UserInterface $user
-     *
-     * @return void
      */
     public function updateCanonicalFields(UserInterface $user);
 
@@ -132,8 +124,6 @@ interface UserManagerInterface
      * Updates a user password if a plain password is set.
      *
      * @param UserInterface $user
-     *
-     * @return void
      */
     public function updatePassword(UserInterface $user);
 }

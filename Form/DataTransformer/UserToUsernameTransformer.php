@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the FOSUserBundle package.
+ *
+ * (c) FriendsOfSymfony <http://friendsofsymfony.github.com/>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace FOS\UserBundle\Form\DataTransformer;
 
 use FOS\UserBundle\Model\UserInterface;
@@ -19,6 +28,11 @@ class UserToUsernameTransformer implements DataTransformerInterface
      */
     protected $userManager;
 
+    /**
+     * UserToUsernameTransformer constructor.
+     *
+     * @param UserManagerInterface $userManager
+     */
     public function __construct(UserManagerInterface $userManager)
     {
         $this->userManager = $userManager;
@@ -36,7 +50,7 @@ class UserToUsernameTransformer implements DataTransformerInterface
     public function transform($value)
     {
         if (null === $value) {
-            return null;
+            return;
         }
 
         if (!$value instanceof UserInterface) {
@@ -58,7 +72,7 @@ class UserToUsernameTransformer implements DataTransformerInterface
     public function reverseTransform($value)
     {
         if (null === $value || '' === $value) {
-            return null;
+            return;
         }
 
         if (!is_string($value)) {
