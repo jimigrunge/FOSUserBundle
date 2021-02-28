@@ -107,7 +107,7 @@ abstract class User implements UserInterface, GroupableInterface
     public function __construct()
     {
         $this->enabled = false;
-        $this->roles = array();
+        $this->roles = [];
     }
 
     /**
@@ -140,7 +140,7 @@ abstract class User implements UserInterface, GroupableInterface
      */
     public function serialize()
     {
-        return serialize(array(
+        return serialize([
             $this->password,
             $this->salt,
             $this->usernameCanonical,
@@ -149,7 +149,7 @@ abstract class User implements UserInterface, GroupableInterface
             $this->id,
             $this->email,
             $this->emailCanonical,
-        ));
+        ]);
     }
 
     /**
@@ -285,7 +285,7 @@ abstract class User implements UserInterface, GroupableInterface
         // we need to make sure to have at least one role
         $roles[] = static::ROLE_DEFAULT;
 
-        return array_unique($roles);
+        return array_values(array_unique($roles));
     }
 
     /**
@@ -473,7 +473,7 @@ abstract class User implements UserInterface, GroupableInterface
     /**
      * Gets the timestamp that the user requested a password reset.
      *
-     * @return null|\DateTime
+     * @return \DateTime|null
      */
     public function getPasswordRequestedAt()
     {
@@ -494,7 +494,7 @@ abstract class User implements UserInterface, GroupableInterface
      */
     public function setRoles(array $roles)
     {
-        $this->roles = array();
+        $this->roles = [];
 
         foreach ($roles as $role) {
             $this->addRole($role);
@@ -516,7 +516,7 @@ abstract class User implements UserInterface, GroupableInterface
      */
     public function getGroupNames()
     {
-        $names = array();
+        $names = [];
         foreach ($this->getGroups() as $group) {
             $names[] = $group->getName();
         }
